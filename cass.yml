@@ -1,0 +1,269 @@
+---
+- name: Checkout Cassandra Repository
+  hosts: localhost
+  gather_facts: false
+  # become: yes
+  become_user: anisbenbrahim
+  tasks:
+
+    - name: Find process ID (PID) using port 7199
+      shell: lsof -t -i :7199
+      register: pid_result
+      ignore_errors: true 
+
+    - name: Kill the process if it's running
+      shell: kill -9 {{ pid_result.stdout }}
+      when: pid_result.stdout is defined
+      ignore_errors: true 
+
+
+    - name: Find process ID (PID) using port 7299
+      shell: lsof -t -i :7299
+      register: pid_result
+      ignore_errors: true 
+
+    - name: Kill the process if it's running
+      shell: kill -9 {{ pid_result.stdout }}
+      when: pid_result.stdout is defined
+      ignore_errors: true 
+
+
+
+
+
+    - name: Find process ID (PID) using port 7399
+      shell: lsof -t -i :7399
+      register: pid_result
+      ignore_errors: true 
+
+    - name: Kill the process if it's running
+      shell: kill -9 {{ pid_result.stdout }}
+      when: pid_result.stdout is defined
+      ignore_errors: true 
+
+
+
+
+
+
+    - name: Ensure cassandra1 folder is absent
+      file:
+        path: "{{ playbook_dir }}/cassandra1"
+        state: absent
+
+
+    - name: Ensure cassandra2 folder is absent
+      file:
+        path: "{{ playbook_dir }}/cassandra2"
+        state: absent
+
+
+    - name: Find and kill CassandraDaemon processes
+      shell: pkill -f CassandraDaemon
+      ignore_errors: true  # Ignore errors if no processes are found
+
+
+
+
+
+
+
+    - name: Create directory for playbook and Cassandra repository
+      file:
+        path: "{{ playbook_dir }}/cassandra1"
+        state: directory
+
+
+    - name: Create directory for playbook and Cassandra repository
+      file:
+        path: "{{ playbook_dir }}/cassandra2"
+        state: directory
+
+    - name: Clone Cassandra repository
+      git:
+        repo: https://github.com/apache/cassandra.git
+        dest: "{{ playbook_dir }}/cassandra1"
+        version: cassandra-4.1.3  # Specify branch or tag if needed : b791644fda91b343a679bb0c2c1e33e594524636
+        force: yes
+      # become: yes
+
+
+
+    - name: Clone Cassandra repository
+      git:
+        repo: https://github.com/apache/cassandra.git
+        dest: "{{ playbook_dir }}/cassandra2"
+        version: cassandra-4.1.3  # Specify branch or tag if needed
+        force: yes
+      # become: yes
+
+
+    - name: Clone Cassandra repository
+      git:
+        repo: https://github.com/apache/cassandra.git
+        dest: "{{ playbook_dir }}/cassandra6"
+        version: cassandra-4.1.3  # Specify branch or tag if needed
+        force: yes
+      # become: yes
+
+
+
+    - name: Build Cassandra with Ant
+      command: "ant -Duse.jdk11=true jar"
+      args:
+        chdir: "{{ playbook_dir }}/cassandra1"
+      environment:
+        JAVA_HOME: "/usr/local/Cellar/openjdk@11/11.0.21/libexec/openjdk.jdk/Contents/Home"        
+      # become: yes
+
+
+    - name: Build Cassandra with Ant
+      command: "ant -Duse.jdk11=true jar"
+      args:
+        chdir: "{{ playbook_dir }}/cassandra2"
+      environment:
+        JAVA_HOME: "/usr/local/Cellar/openjdk@11/11.0.21/libexec/openjdk.jdk/Contents/Home"        
+      # become: yes
+
+    - name: Build Cassandra with Ant
+      command: "ant -Duse.jdk11=true jar"
+      args:
+        chdir: "{{ playbook_dir }}/cassandra6"
+      environment:
+        JAVA_HOME: "/usr/local/Cellar/openjdk@11/11.0.21/libexec/openjdk.jdk/Contents/Home"        
+      # become: yes
+
+
+
+    - name: generate IDEA CASSANDRA 2
+      command: "ant -Duse.jdk11=true generate-idea-files"
+      args:
+        chdir: "{{ playbook_dir }}/cassandra2"
+      environment:
+        JAVA_HOME: "/usr/local/Cellar/openjdk@11/11.0.21/libexec/openjdk.jdk/Contents/Home"        
+      # become: yes
+
+
+
+    - name: Copy Cassandra configuration template
+      template:
+        src: ./template/cassandra-template.yml.j2
+        dest: "{{ playbook_dir }}/cassandra1/conf/cassandra.yaml"
+      vars:
+        rpc_address: '127.0.0.1'  
+        listen_address: "127.0.0.1"
+        broadcast_address: "127.0.0.3"  
+        native_transport_port: "9042"
+        seeds: "127.0.0.3:7000"
+         
+
+    - name: Copy cassandra-env.sh.j2
+      template:
+        src: ./template/cassandra-env.sh.j2
+        dest: "{{ playbook_dir }}/cassandra1/conf/cassandra-env.sh"
+      vars:
+        JMX_PORT: '7299'  
+
+
+    - name: Copy cassandra-rackdc.properties
+      template:
+        src: ./template/cassandra-rackdc.properties.j2
+        dest: "{{ playbook_dir }}/cassandra1/conf/cassandra-rackdc.properties"
+      vars:
+        DC: 'dc1'
+        RACK: 'rack1'
+
+
+
+
+    - name: Copy Cassandra configuration template
+      template:
+        src: ./template/cassandra-template.yml.j2
+        dest: "{{ playbook_dir }}/cassandra2/conf/cassandra.yaml"
+      vars:
+        rpc_address: '127.0.0.2'  
+        listen_address: "127.0.0.2"
+        broadcast_address: "127.0.0.4"  
+        native_transport_port: "9142"
+        seeds: "127.0.0.3:7000"
+         
+
+    - name: Copy cassandra-env.sh.j2
+      template:
+        src: ./template/cassandra-env.sh.j2
+        dest: "{{ playbook_dir }}/cassandra2/conf/cassandra-env.sh"
+      vars:
+        JMX_PORT: '7199'  
+
+
+    - name: Copy cassandra-rackdc.properties
+      template:
+        src: ./template/cassandra-rackdc.properties.j2
+        dest: "{{ playbook_dir }}/cassandra2/conf/cassandra-rackdc.properties"
+      vars:
+        DC: 'dc2'
+        RACK: 'rack1'
+
+
+
+
+
+
+    - name: Copy Cassandra configuration template
+      template:
+        src: ./template/cassandra-template.yml.j2
+        dest: "{{ playbook_dir }}/cassandra6/conf/cassandra.yaml"
+      vars:
+        rpc_address: '127.0.0.6'  
+        listen_address: "127.0.0.6"
+        broadcast_address: "127.0.0.8"  
+        native_transport_port: "9242"
+        seeds: "127.0.0.3:7000"
+         
+
+    - name: Copy cassandra-env.sh.j2
+      template:
+        src: ./template/cassandra-env.sh.j2
+        dest: "{{ playbook_dir }}/cassandra6/conf/cassandra-env.sh"
+      vars:
+        JMX_PORT: '7399'  
+
+
+    - name: Copy cassandra-rackdc.properties
+      template:
+        src: ./template/cassandra-rackdc.properties.j2
+        dest: "{{ playbook_dir }}/cassandra6/conf/cassandra-rackdc.properties"
+      vars:
+        DC: 'dc2'
+        RACK: 'rack2'
+
+
+
+
+
+
+
+
+
+    - name: Start Cassandra 1
+      command: "{{ playbook_dir }}/cassandra1/bin/cassandra"
+
+
+    - name: Wait for Cassandra to reach NORMAL state
+      wait_for:
+        path: "{{ playbook_dir }}/cassandra1/logs/system.log"
+        search_regex: "state jump to NORMAL"
+
+
+
+    - name: Start Cassandra 6
+      command: "{{ playbook_dir }}/cassandra6/bin/cassandra"
+
+
+    - name: Wait for Cassandra to reach NORMAL state
+      wait_for:
+        path: "{{ playbook_dir }}/cassandra6/logs/system.log"
+        search_regex: "state jump to NORMAL"
+
+
+

@@ -1,0 +1,44 @@
+-Dcassandra-rackdc.properties=file:///Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/conf/cassandra-rackdc.properties
+
+
+-Dcassandra-rackdc.properties=file:///Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/conf/cassandra-rackdc.properties
+
+
+
+
+
+
+-Dcassandra-foreground=yes -Dcassandra-rackdc.properties=file:///Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/conf/cassandra-rackdc.properties -Dcassandra.config=file:///Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/conf/cassandra.yaml -Dcassandra.storagedir=/Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/data -Dlogback.configurationFile=file:///Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/conf/logback.xml -Dcassandra.logdir=/Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/logs -Djava.library.path=/Users/anisbenbrahim/Documents/projet/ericsson/prefer_local_issue/delete/ansible/cassandra2/lib/sigar-bin -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=7199 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -ea -Xmx1G -Djdk.attach.allowAttachSelf=true -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:SurvivorRatio=8 -XX:MaxTenuringThreshold=1 -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSWaitDuration=10000 -XX:+CMSParallelInitialMarkEnabled -XX:+CMSEdenChunksRecordAlways --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+
+
+
+
+CREATE KEYSPACE testpreferred WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 1, 'dc2': 1};
+CREATE TABLE testpreferred.tbl1 (key int PRIMARY KEY) WITH speculative_retry = 'NONE';
+
+
+
+
+INSERT INTO testpreferred.tbl1 (key) VALUES (1);
+INSERT INTO testpreferred.tbl1 (key) VALUES (2);
+INSERT INTO testpreferred.tbl1 (key) VALUES (3);
+INSERT INTO testpreferred.tbl1 (key) VALUES (4);
+INSERT INTO testpreferred.tbl1 (key) VALUES (5);
+INSERT INTO testpreferred.tbl1 (key) VALUES (6);
+INSERT INTO testpreferred.tbl1 (key) VALUES (7);
+INSERT INTO testpreferred.tbl1 (key) VALUES (8);
+INSERT INTO testpreferred.tbl1 (key) VALUES (9);
+INSERT INTO testpreferred.tbl1 (key) VALUES (10);
+INSERT INTO testpreferred.tbl1 (key) VALUES (11);
+INSERT INTO testpreferred.tbl1 (key) VALUES (12);
+INSERT INTO testpreferred.tbl1 (key) VALUES (13);
+INSERT INTO testpreferred.tbl1 (key) VALUES (14);
+INSERT INTO testpreferred.tbl1 (key) VALUES (15);
+INSERT INTO testpreferred.tbl1 (key) VALUES (16);
+
+
+
+./bin/nodetool rebuild dc1
+
+
+test_cross_dc_streaming_with_preferred
